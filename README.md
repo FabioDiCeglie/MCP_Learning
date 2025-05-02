@@ -4,13 +4,13 @@ The Model Context Protocol (MCP) is a powerful framework that enables developers
 
 ## Table of Contents
 
-1. [Introduction and Context](./1-introduction-and-context/README.md)
-2. [Understanding MCP](./2-understanding-mcp/README.md)
-3. [Simple Server Setup with Python SDK](./3-simple-server-setup/README.md)
-4. [OpenAI Integration](./4-openai-integration/README.md)
-5. [MCP vs Function Calling](./5-mcp-vs-function-calling/README.md)
-6. [Running with Docker](./6-run-with-docker/README.md)
-7. [Lifecycle Management](./7-lifecycle-management/README.md)
+1. [Introduction and Context](./introduction-and-context/README.md)
+2. [Understanding MCP](./understanding-mcp/README.md)
+3. [Simple Server Setup with Python SDK](./simple-server-setup/README.md)
+4. [OpenAI Integration](./openai-integration/README.md)
+5. [MCP vs Function Calling](./mcp-vs-function-calling/README.md)
+6. [Running with Docker](./run-with-docker/README.md)
+7. [Lifecycle Management](./lifecycle-management/README.md)
 
 ## Setting Up Your Development Environment with uv
 
