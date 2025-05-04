@@ -45,6 +45,15 @@ def search_knowledge_base() -> str:
         return "Error: Invalid JSON in knowledge base file"
     except Exception as e:
         return f"Error: {str(e)}"
-
+    
+# Run the server
 if __name__ == "__main__":
-    mcp.run(transport="stdio")
+    transport = "sse"
+    if transport == "stdio":
+        print("Running server in stdio mode")
+        mcp.run(transport="stdio")
+    elif transport == "sse":
+        print("Running server in SSE mode")
+        mcp.run(transport="sse")
+    else:
+        raise ValueError(f"Unknown transport: {transport}")

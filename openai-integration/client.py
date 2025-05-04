@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from openai import AsyncOpenAI
+from mcp.client.sse import sse_client
 
 load_dotenv(".env")
 
@@ -20,6 +21,7 @@ openai_client = AsyncOpenAI()
 model = "gpt-4o"
 stdio = None
 write = None
+transport = "sse"
 
 async def connect_to_server(server_script_path: str = "server.py"):
     """Connect to an MCP server.
@@ -28,20 +30,31 @@ async def connect_to_server(server_script_path: str = "server.py"):
         server_script_path (str): The path to the server script.
     """
     global session, stdio, write, exit_stack
+    if transport == "stdio":
+        # Server configuration
+        server_params = StdioServerParameters(
+            command= "python3",
+            args=[server_script_path],
+        )
 
-    # Server configuration
-    server_params = StdioServerParameters(
-        command= "python3",
-        args=[server_script_path],
-    )
+        # Connect to the server using STDIO transport
+        stdio_transport = await exit_stack.enter_async_context(stdio_client(server_params))
+        stdio, write = stdio_transport
+        session = await exit_stack.enter_async_context(ClientSession(stdio, write))
 
-    # Connect to the server
-    stdio_transport = await exit_stack.enter_async_context(stdio_client(server_params))
-    stdio, write = stdio_transport
-    session = await exit_stack.enter_async_context(ClientSession(stdio, write))
-
-    # Initialize the connection
-    await session.initialize()
+        # Initialize the connection
+        await session.initialize()
+    elif transport == "sse":
+        """Make sure: The server is running before running this in SSE mode."""
+        # Connect to the server using SSE transport
+        read_stream, write_stream = await exit_stack.enter_async_context(
+            sse_client("http://localhost:8050/sse")
+        )
+        session = await exit_stack.enter_async_context(
+            ClientSession(read_stream, write_stream)
+        )
+        # Initialize the session
+        await session.initialize()
 
     # List available tools
     tools_result = await session.list_tools()
@@ -139,8 +152,14 @@ async def cleanup():
     await exit_stack.aclose()
 
 async def main():
-    """Main entry point for the client."""
-    await connect_to_server("server.py")
+    if transport == "stdio":
+        print("Connecting to server in stdio mode")
+        await connect_to_server("server.py")
+    elif transport == "sse":
+        print("Connecting to server in SSE mode")
+        await connect_to_server("server.py")
+    else:
+        raise ValueError(f"Unknown transport: {transport}")
 
     # Example: Ask about company vacation policy
     query = "What is our company's vacation policy?"
